@@ -185,11 +185,11 @@ def diagonal_bilstm(inputs, conf, scope='diagonal_bilstm'):
         
         batch, height, width, channel = get_shape(output_state_bw)
         
-        output_state_bw_except_first = tf.slice(output_state_bw, [0, 0, 0, 0], [-1, height-1, -1, -1])
-        output_state_bw_only_first = tf.slice(output_state_bw, [0, height-1, 0, 0], [-1, 1, -1, -1])
-        dummy_zeros = tf.zeros_like(output_state_bw_only_first)
+        output_state_bw_except_last = tf.slice(output_state_bw, [0, 0, 0, 0], [-1, height-1, -1, -1])
+        output_state_bw_only_last = tf.slice(output_state_bw, [0, height-1, 0, 0], [-1, 1, -1, -1])
+        dummy_zeros = tf.zeros_like(output_state_bw_only_last)
         
-        output_state_bw_with_first_zeros = tf.concat(1, [dummy_zeros, output_state_bw_except_first])
+        output_state_bw_with_first_zeros = tf.concat(1, [dummy_zeros, output_state_bw_except_last])
         tf.add_to_collection('output_state_bw_with_fist_zeros', output_state_bw_with_first_zeros)
         
         output_state = output_state_fw + output_state_bw_with_first_zeros
