@@ -49,11 +49,8 @@ conf = flags.FLAGS
 logger = logging.getLogger()
 formatter = logging.Formatter(fmt = "[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s",
                               datefmt = "%y-%m-%d %H:%M:%S")
-fileHandler = logging.FileHandler('./logs/test.log')
-fileHandler.setFormatter(formatter)
 streamHandler = logging.StreamHandler()
 streamHandler.setFormatter(formatter)
-logger.addHandler(fileHandler)
 logger.addHandler(streamHandler)
 logger.setLevel(conf.log_level)
 
