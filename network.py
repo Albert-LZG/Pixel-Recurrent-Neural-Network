@@ -138,8 +138,8 @@ class Network:
         '''
 
     def generate(self):
-        #samples = np.zeros((100, self.height, self.width, 1), dtype='float32')
-        samples = np.random.uniform(size = (100, self.height, self.width, 1))
+        samples = np.zeros((100, self.height, self.width, 1), dtype='float32')
+        #samples = np.random.uniform(size = (100, self.height, self.width, 1))
         samples[:,0,0,0] = 0
     
         for i in xrange(self.height):
