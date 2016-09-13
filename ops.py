@@ -108,9 +108,9 @@ def conv2d(
             if mask_type == 'a':
                 mask[center_h,center_w,:,:] = 0.
             
-            weights *= tf.constant(mask, dtype=tf.float32)
+            weights = tf.mul(weights, tf.constant(mask, dtype=tf.float32))
             tf.add_to_collection('conv2d_weights_%s' % mask_type, weights)
-        
+
         outputs = tf.nn.conv2d(inputs,
                                weights, [1, stride_h, stride_w, 1], padding=padding, name='outputs')
         tf.add_to_collection('conv2d_outputs', outputs)
@@ -189,10 +189,10 @@ def diagonal_bilstm(inputs, conf, scope='diagonal_bilstm'):
         output_state_bw_only_last = tf.slice(output_state_bw, [0, height-1, 0, 0], [-1, 1, -1, -1])
         dummy_zeros = tf.zeros_like(output_state_bw_only_last)
         
-        output_state_bw_with_first_zeros = tf.concat(1, [dummy_zeros, output_state_bw_except_last])
-        tf.add_to_collection('output_state_bw_with_fist_zeros', output_state_bw_with_first_zeros)
+        output_state_bw_with_last_zeros = tf.concat(1, [dummy_zeros, output_state_bw_except_last])
+        tf.add_to_collection('output_state_bw_with_last_zeros', output_state_bw_with_last_zeros)
         
-        output_state = output_state_fw + output_state_bw_with_first_zeros
+        output_state = output_state_fw + output_state_bw_with_last_zeros
         
         
         if conf.use_residual:
@@ -298,10 +298,10 @@ class DiagonalLSTMCell(rnn_cell.RNNCell):
             tf.add_to_collection('conv_s_to_s', conv_s_to_s)
             tf.add_to_collection('s_to_s', s_to_s)
             
-            pre_lstm_matrix = s_to_s + i_to_s #i_to_s: width * [batch, 4 * height * hidden_dims]
-            pre_lstm_matrix = tf.reshape(pre_lstm_matrix, [-1, self._height, 1, 4])
-            pre_lstm_matrix = tf.transpose(pre_lstm_matrix, [0, 3, 1, 2])
-            pre_lstm_matrix = tf.reshape(pre_lstm_matrix, [-1, self._height * self._hidden_dims * 4])
+            pre_lstm_matrix = s_to_s + i_to_s #i_to_s: [batch, 4 * height * hidden_dims]
+            pre_lstm_matrix = tf.reshape(pre_lstm_matrix, [-1, self._height, self._hidden_dims, 4]) #[batch, height, hidden_dims, 4]
+            pre_lstm_matrix = tf.transpose(pre_lstm_matrix, [0, 3, 1, 2]) #[batch, 4*hidden_dims, height, 1]
+            pre_lstm_matrix = tf.reshape(pre_lstm_matrix, [-1, self._height * self._hidden_dims * 4]) #[batch, 4 * height * hidden_dims]
             
             # i = input_gate, g = new_input, f = forget_gate, o = output_gate
             o, f, i, g = tf.split(1, 4, pre_lstm_matrix)
@@ -324,8 +324,8 @@ class DiagonalLSTMCell(rnn_cell.RNNCell):
             g_b = tf.get_variable("g_biases", [num_outputs,],
                                   tf.float32, tf.zeros_initializer)
             g = tf.tanh(tf.nn.bias_add(g, g_b, name='lstm_g_plus_b'))
-            ##
             
+            ## no bias ** need to retrain the network
             '''
             o = tf.sigmoid(o)
             f = tf.sigmoid(f)

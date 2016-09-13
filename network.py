@@ -3,6 +3,7 @@ from logging import getLogger
 
 from ops import *
 from utils import *
+from tqdm import trange
 
 logger = getLogger(__name__)
 
@@ -130,19 +131,14 @@ class Network:
         return cost
 
     def test(self, images):
-        outputs, cost = self.sess.run([self.l['output'], self.loss], feed_dict={ self.l['inputs']: images })
-        return outputs, cost
-        '''
         cost = self.sess.run(self.loss, feed_dict={ self.l['inputs']: images })
         return cost
-        '''
 
     def generate(self):
-        samples = np.zeros((100, self.height, self.width, 1), dtype='float32')
-        samples[:,0,0,0] = 0
+        samples = np.zeros((100, self.height, self.width, 1), dtype = 'float32')
     
-        for i in xrange(self.height):
-            for j in xrange(self.width):
+        for i in trange(self.height, ncols = 100, initial = 0, desc = "Column"):
+            for j in trange(self.width, ncols = 100, initial = 0, desc = "Row"):
                 for k in xrange(self.channel):
                     next_sample = binarize(self.predict(samples))
                     samples[:, i, j, k] = next_sample[:, i, j, k]
