@@ -1,4 +1,7 @@
-logs/test.log
+.gitignore
+.idea/*
+checkpoints/*
+logs/*
 network.pyc
 ops.pyc
 statistic.pyc

@@ -139,14 +139,12 @@ class Network:
 
     def generate(self):
         samples = np.zeros((100, self.height, self.width, 1), dtype='float32')
-        #samples = np.random.uniform(size = (100, self.height, self.width, 1))
         samples[:,0,0,0] = 0
     
         for i in xrange(self.height):
             for j in xrange(self.width):
                 for k in xrange(self.channel):
-                    #next_sample = binarize(self.predict(samples))
-                    next_sample = self.predict(samples)
+                    next_sample = binarize(self.predict(samples))
                     samples[:, i, j, k] = next_sample[:, i, j, k]
                 
                     '''
